@@ -32,15 +32,21 @@ class GoogleDriveCon:
 			files_json = json.loads(content)
 			if files_json['mimeType'].endswith('spreadsheet'):
 				exportMime = "text/csv"
-			elif files_json['mimeType'].endswith('folder'):
-				'[ERROR] Cannot stream a folder.'
-			else:
+			elif files_json['mimeType'].endswith('spreadsheet'):
 				exportMime = "text/plain"
+			elif files_json['mimeType'].endswith('folder'):
+				print '[ERROR] Cannot stream a folder.'
+				return ""
+			else:
+				exportMime = None
 		else:
 			print '[ERROR] ' + str(resp) + '\n' + str(content)
 			return ""
 
-		resp, content = self._queryDrive('GET', fileId + '/export' + '?' + urllib.urlencode( {"mimeType": exportMime} )) 
+		if (exportMime):
+			resp, content = self._queryDrive('GET', fileId + '/export' + '?' + urllib.urlencode( {"mimeType": exportMime} ))
+		else:
+			resp, content = self._queryDrive('GET', fileId +  '?' + urllib.urlencode( {"acknowledgeAbuse": True, "alt": "media"} ))
 
 		if (resp['status'] == '200'):
 			return content
