@@ -12,12 +12,13 @@ class GoogleDriveCon:
 	def __init__(self, access_file):
 		self.access_file = access_file
 
-	def _queryDrive(self, method, query):
+	def _queryDrive(self, method, query, body=None):
 		credentials = ServiceAccountCredentials.from_json_keyfile_name(self.access_file, self.scope)
 		http = credentials.authorize(httplib2.Http())
 		resp, content = http.request(
 		    uri=self.baseUrl + query,
 		    method=method,
+		    body=body,
 		)
 		return resp, content
 
@@ -36,12 +37,12 @@ class GoogleDriveCon:
 				exportMime = "text/plain"
 			elif files_json['mimeType'].endswith('folder'):
 				print '[ERROR] Cannot stream a folder.'
-				return ""
+				return None
 			else:
 				exportMime = None
 		else:
 			print '[ERROR] ' + str(resp) + '\n' + str(content)
-			return ""
+			return None
 
 		if (exportMime):
 			resp, content = self._queryDrive('GET', fileId + '/export' + '?' + urllib.urlencode( { "mimeType": exportMime } ))
@@ -52,10 +53,10 @@ class GoogleDriveCon:
 			return content
 		else:
 			print '[ERROR] ' + str(resp) + '\n' + str(content)
-			return ""
+			return None
 	
 	# Lists files in the specified folder
-	# TODO: add a way to specify format of the export
+	# Returns list of file objects, like so: { "kind": "drive#file", "id": string, "name": string, "mimeType": string }
 	def listFiles(self, folderId):
 		resp, content = self._queryDrive('GET', folderId)
 		
@@ -73,3 +74,49 @@ class GoogleDriveCon:
 		else:
 			print '[ERROR] ' + str(resp) + '\n' + str(content)
 			return []
+
+	# Create folder in the specified folder
+	# Retuns a file object, like so: { "kind": "drive#file", "id": string, "name": string, "mimeType": string }
+	def makeFolder(self, folderId, folderName):
+		files = self.listFiles(folderId)
+		
+		if (len(filter(lambda x: (x["mimeType"].endswith("folder") and (x["name"] == folderName)), files)) > 0):
+			print '[ERROR] Folder "' + folderName + '" already exists in folder with Google ID ' + folderId
+			return None
+
+		file_metadata = {
+			"name" : folderName,
+			"mimeType" : "application/vnd.google-apps.folder",
+			"parents": [folderId]
+		}
+
+		resp, content = self._queryDrive('POST', '', body=json.dumps(file_metadata)) 
+
+		if (resp['status'] == '200'):
+			files_json = json.loads(content)
+			return files_json["files"]
+		else:
+			print '[ERROR] ' + str(resp) + '\n' + str(content)
+			return None
+
+	# Move file into the specified folder
+	# Retuns a file object, like so: { "kind": "drive#file", "id": string, "name": string, "mimeType": string }
+	def moveObject(self, objectId, newParentFolderId):
+		resp, content = self._queryDrive('GET', objectId + '?' + urllib.urlencode({ "fields": "parents" }))
+		
+		if (resp['status'] == '200'):
+			file_json = json.loads(content)
+			oldParents = ",".join(file_json['parents'])
+		else:
+			print '[ERROR] Google ID "' + objectId + '" does not exist.'
+			return None
+
+		resp, content = self._queryDrive('PATCH', objectId + '?' + urllib.urlencode({ "addParents": newParentFolderId, "removeParents": oldParents })) 
+
+		if (resp['status'] == '200'):
+			files_json = json.loads(content)
+			return files_json["files"]
+		else:
+			print '[ERROR] ' + str(resp) + '\n' + str(content)
+			return None
+
