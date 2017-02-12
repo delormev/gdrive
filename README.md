@@ -18,6 +18,10 @@ pip install https://github.com/delormev/google-drive/zipball/master
 
 ## Usage
 
+1. Create a new [service account](https://console.developers.google.com/apis/credentials) and a matching [service account key](https://console.developers.google.com/apis/credentials) in Google's Developer Console. Make a note of the email address for your service account, and download the JSON file associated with your key
+2. Share the documents and folders you wish to access with the service account (by sharing it with the associated email address)
+3. Connect to your Google Drive and access your documents:
+
 ```python
 import gdrive
 
