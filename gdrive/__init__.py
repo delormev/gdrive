@@ -44,9 +44,9 @@ class GoogleDriveCon:
 			return ""
 
 		if (exportMime):
-			resp, content = self._queryDrive('GET', fileId + '/export' + '?' + urllib.urlencode( {"mimeType": exportMime} ))
+			resp, content = self._queryDrive('GET', fileId + '/export' + '?' + urllib.urlencode( { "mimeType": exportMime } ))
 		else:
-			resp, content = self._queryDrive('GET', fileId +  '?' + urllib.urlencode( {"acknowledgeAbuse": True, "alt": "media"} ))
+			resp, content = self._queryDrive('GET', fileId +  '?' + urllib.urlencode( { "alt": "media" } ))
 
 		if (resp['status'] == '200'):
 			return content
