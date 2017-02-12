@@ -66,7 +66,7 @@ class GoogleDriveCon:
 				print '[ERROR] Google ID specified is not a folder.'
 				return []
 
-		resp, content = self._queryDrive('GET', '?' + urllib.urlencode( { "q": "'0BxEvfXu_ejXDRGlSVTh6ZDJuR0k' in parents", "orderBy": "modifiedTime"} )) 
+		resp, content = self._queryDrive('GET', '?' + urllib.urlencode( { "q": "'" + folderId + "' in parents", "orderBy": "modifiedTime"} )) 
 
 		if (resp['status'] == '200'):
 			files_json = json.loads(content)
