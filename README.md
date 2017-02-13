@@ -13,7 +13,7 @@ python setup.py install
 Or install with pip:
 
 ```bash
-pip install https://github.com/delormev/google-drive/zipball/master
+pip install https://github.com/delormev/gdrive/zipball/master
 ```
 
 ## Usage
