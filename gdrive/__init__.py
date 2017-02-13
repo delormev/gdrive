@@ -14,6 +14,7 @@ class GoogleDriveCon:
 		self.access_file = access_file
 
 	def _queryDrive(self, method, query, body=None):
+		print str(body)
 		credentials = ServiceAccountCredentials.from_json_keyfile_name(self.access_file, self.scope)
 		http = credentials.authorize(httplib2.Http())
 		resp, content = http.request(
