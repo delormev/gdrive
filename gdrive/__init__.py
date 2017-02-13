@@ -19,9 +19,8 @@ class GoogleDriveCon:
 		http = credentials.authorize(httplib2.Http())
 		resp, content = http.request(
 		    uri=self.baseUrl + query,
-		    headers={"Content-type": "application/x-www-form-urlencoded"},
 		    method=method,
-		    body=json.dumps(body),
+		    data=json.dumps(body),
 		)
 		return resp, content
 
