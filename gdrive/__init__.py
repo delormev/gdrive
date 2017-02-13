@@ -20,7 +20,7 @@ class GoogleDriveCon:
 		resp, content = http.request(
 		    uri=self.baseUrl + query,
 		    method=method,
-		    body=json.dumps(body) if body else None,
+		    body=body,
 		)
 		return resp, content
 
