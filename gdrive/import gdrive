@@ -1,0 +1,7 @@
+import gdrive
+
+conn = gdrive.GoogleDriveCon('/Users/v/.google_access.json')
+
+folderList = conn.listFiles('0BxEvfXu_ejXDOFkwTy1WbmRFMVE')
+test = conn.makeFolder('0BxEvfXu_ejXDUjBrTWlZMUprTTg', 'Archive', 'vincent.delorme@gmail.com')
+conn.listFiles('0BxEvfXu_ejXDUjBrTWlZMUprTTg')
