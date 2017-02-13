@@ -2,6 +2,7 @@ import httplib2
 import urllib
 import json
 from oauth2client.service_account import ServiceAccountCredentials
+import sys
 
 class GoogleDriveCon:
 	# Defines scope and base URL
@@ -18,11 +19,31 @@ class GoogleDriveCon:
 		resp, content = http.request(
 		    uri=self.baseUrl + query,
 		    method=method,
-		    body=body,
+		    body=json.dumps(body) if body else None,
 		)
 		return resp, content
 
 	# Public functions
+
+	# Change owner for the specificed file to email address
+	def changeOwner(self, objectId, email):
+		resp, content = self._queryDrive('GET', objectId)
+		
+		if (resp['status'] == '200'):
+			params = { "role": "owner", "type": "user", "emailAddress": email }
+		else:
+			print '[ERROR] Google ID "' + objectId + '" does not exist.'
+			return None
+
+		resp, content = self._queryDrive('POST', objectId + '/permissions?' + urllib.urlencode({ "transferOwnership": True }), body=params)
+
+		if (resp['status'] == '200'):
+			files_json = json.loads(content)
+			return files_json
+		else:
+			print '[ERROR] ' + str(resp) + '\n' + str(content)
+			return None
+
 
 	# Opens specific file. Defaults to CSV for spreadsheets, plain text for everything else
 	# TODO: add a way to specify format of the export
@@ -77,7 +98,7 @@ class GoogleDriveCon:
 
 	# Create folder in the specified folder
 	# Retuns a file object, like so: { "kind": "drive#file", "id": string, "name": string, "mimeType": string }
-	def makeFolder(self, folderId, folderName):
+	def makeFolder(self, folderId, folderName, owner):
 		files = self.listFiles(folderId)
 		
 		if (len(filter(lambda x: (x["mimeType"].endswith("folder") and (x["name"] == folderName)), files)) > 0):
@@ -90,14 +111,17 @@ class GoogleDriveCon:
 			"parents": [folderId]
 		}
 
-		resp, content = self._queryDrive('POST', '', body=json.dumps(file_metadata)) 
+		resp, content = self._queryDrive('POST', '', body=file_metadata) 
 
 		if (resp['status'] == '200'):
 			files_json = json.loads(content)
-			return files_json["files"]
+			print files_json
+			sys.exit()
 		else:
 			print '[ERROR] ' + str(resp) + '\n' + str(content)
 			return None
+
+		return changeOwner(self, objectId, email)
 
 	# Move file into the specified folder
 	# Retuns a file object, like so: { "kind": "drive#file", "id": string, "name": string, "mimeType": string }
