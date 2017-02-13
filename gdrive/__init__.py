@@ -108,7 +108,7 @@ class GoogleDriveCon:
 		file_metadata = {
 			"name" : folderName,
 			"mimeType" : "application/vnd.google-apps.folder",
-			"parents": [folderId]
+			"parents": [ { "id": folderId } ]
 		}
 
 		resp, content = self._queryDrive('POST', '', body=file_metadata) 
@@ -116,7 +116,7 @@ class GoogleDriveCon:
 		if (resp['status'] == '200'):
 			files_json = json.loads(content)
 			print files_json
-			sys.exit()
+			return None
 		else:
 			print '[ERROR] ' + str(resp) + '\n' + str(content)
 			return None
