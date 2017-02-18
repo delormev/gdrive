@@ -19,7 +19,7 @@ class GoogleDriveCon:
 		http = credentials.authorize(httplib2.Http())
 		resp, content = http.request(
 		    uri=self.baseUrl + query,
-		    headers={"Content-type": "application/json"},
+		    headers={"Content-Type": "application/json"} if body else None,
 		    method=method,
 		    body=json.dumps(body),
 		)
